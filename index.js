@@ -37,28 +37,24 @@ export const createDbClient = () => {
 const runCron = async () => {
   while (true) {
     const clientInstance = await createDbClient();
-
     const flow_response = await clientInstance
       .from("Flow")
       .select()
       .match({ trigger_type: "time" });
     if (flow_response.error) {
-      return {
-        status: flow_response.status,
-        data: flow_response.error.message,
-      };
+      continue;
     }
     for (let flow of flow_response.data) {
-      console.log(flow.id);
       const job_status_response = await clientInstance
         .from("JobStatus")
         .select()
-        .match({ flow_id: flow.id, status: "SUCCESS" });
+        .match({ flow_id: flow.id, status: "SUCCESS" })
+        .order("created_at", { ascending: false });
       if (job_status_response.data) {
         if (
           !job_status_response.data ||
           job_status_response.data.length == 0 ||
-          Date.now() - job_status_response.data[0].created_at >
+          Date.now() - new Date(job_status_response.data[0].created_at) >=
             flow.trigger_condition
         ) {
           const JobStatus = {
@@ -76,7 +72,7 @@ const runCron = async () => {
         }
       }
     }
-    await new Promise(r => setTimeout(r, 5 * 60 * 1000));
+    await new Promise(r => setTimeout(r, 100 * 60 * 1000));
   }
 };
 
