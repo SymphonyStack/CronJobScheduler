@@ -72,7 +72,7 @@ const runCron = async () => {
         }
       }
     }
-    await new Promise(r => setTimeout(r, 100 * 60 * 1000));
+    await new Promise(r => setTimeout(r, 5 * 60 * 1000));
   }
 };
 
