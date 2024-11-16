@@ -45,6 +45,7 @@ const runCron = async () => {
       continue;
     }
     for (let flow of flow_response.data) {
+      console.log("FLOW: ",flow);
       const job_status_response = await clientInstance
         .from("JobStatus")
         .select()
